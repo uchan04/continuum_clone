@@ -35,9 +35,9 @@ export default function LoginScreen({ onLogin }: { onLogin: () => void }) {
   };
 
   return (
-    <div style={{ height: "100vh", width: "100%", display: "flex", fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="login-shell">
       {/* Left panel — white login */}
-      <div style={{ width: "50%", minWidth: 360, background: "#fff", display: "flex", flexDirection: "column", padding: "32px 40px" }}>
+      <div className="login-left">
         {/* Logo top-left */}
         <div style={{ marginBottom: "auto" }}>
           <img src={logoImg} alt="Continuum" style={{ height: 44, objectFit: "contain" }} />
@@ -183,19 +183,27 @@ export default function LoginScreen({ onLogin }: { onLogin: () => void }) {
       </div>
 
       {/* Right panel — dark showcase */}
-      <div style={{ flex: 1, background: "#0d0d18", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+      <div className="login-right">
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(160deg, #1a1a2e 0%, #0d0d18 60%)" }} />
-        <div style={{ position: "absolute", top: 32, left: 32, right: 32, bottom: 140, borderRadius: 16, background: "#fff", overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.5)", opacity: 0.12 }} />
-        <div style={{ position: "absolute", top: 40, left: 40, right: 40, bottom: 148, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
+
+        {/* 상단 배지 */}
+        <div style={{ position: "absolute", top: "clamp(24px, 4vw, 40px)", left: "clamp(24px, 4vw, 40px)", zIndex: 10, display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, padding: "6px 14px" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#4ade80", animation: "pulse-orb 2s ease-in-out infinite" }} />
+          <span style={{ fontSize: 11, color: "#d1d5db", fontWeight: 500 }}>실시간으로 150+ 팀의 오프보딩을 처리 중</span>
+        </div>
+
+        {/* 대시보드 목업 */}
+        <div style={{ position: "absolute", top: "clamp(72px, 8vw, 96px)", left: "clamp(24px, 4vw, 40px)", right: "clamp(24px, 4vw, 40px)", bottom: 372, borderRadius: 16, background: "#fff", overflow: "hidden", boxShadow: "0 32px 80px rgba(0,0,0,0.5)", opacity: 0.12 }} />
+        <div style={{ position: "absolute", top: "clamp(80px, 8.5vw, 104px)", left: "clamp(32px, 4.5vw, 48px)", right: "clamp(32px, 4.5vw, 48px)", bottom: 380, borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)" }}>
           <div style={{ height: "100%", background: "#f0f2f7", display: "flex", flexDirection: "column" }}>
-            <div style={{ height: 40, background: "#fff", borderBottom: "1px solid #e8eaf0", display: "flex", alignItems: "center", padding: "0 16px", gap: 8 }}>
+            <div style={{ height: 40, background: "#fff", borderBottom: "1px solid #e8eaf0", display: "flex", alignItems: "center", padding: "0 16px", gap: 8, flexShrink: 0 }}>
               <div style={{ width: 60, height: 10, borderRadius: 4, background: "#e5e7eb" }} />
               <div style={{ flex: 1 }} />
               {[1,2,3].map(i => <div key={i} style={{ width: 28, height: 10, borderRadius: 4, background: "#f3f4f6" }} />)}
             </div>
-            <div style={{ display: "flex", flex: 1, gap: 0 }}>
-              <div style={{ width: 48, background: "#fff", borderRight: "1px solid #f0f0f5" }} />
-              <div style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", flex: 1, gap: 0, minHeight: 0 }}>
+              <div style={{ width: 48, background: "#fff", borderRight: "1px solid #f0f0f5", flexShrink: 0 }} />
+              <div style={{ flex: 1, padding: 12, display: "flex", flexDirection: "column", gap: 8, minWidth: 0 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6 }}>
                   {["146", "5,614만원", "184", "170"].map(v => (
                     <div key={v} style={{ background: "#fff", borderRadius: 6, padding: "8px 10px", border: "1px solid #f0f0f5" }}>
@@ -204,21 +212,79 @@ export default function LoginScreen({ onLogin }: { onLogin: () => void }) {
                     </div>
                   ))}
                 </div>
-                <div style={{ flex: 1, background: "#fff", borderRadius: 6, border: "1px solid #f0f0f5" }} />
+                <div style={{ flex: 1, background: "#fff", borderRadius: 6, border: "1px solid #f0f0f5", padding: 10, display: "flex", flexDirection: "column", gap: 6, minHeight: 0, overflow: "hidden" }}>
+                  <div style={{ width: 50, height: 7, borderRadius: 3, background: "#e5e7eb", marginBottom: 2, flexShrink: 0 }} />
+                  <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 5, minHeight: 0 }}>
+                    {[38, 62, 45, 80, 55, 70, 42, 90, 60].map((h, i) => (
+                      <div key={i} style={{ flex: 1, height: `${h}%`, borderRadius: "3px 3px 0 0", background: i === 7 ? "#6366f1" : "#e0e3ff" }} />
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
+                    {[1, 2, 3].map(i => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#eef2ff", flexShrink: 0 }} />
+                        <div style={{ flex: 1, height: 6, borderRadius: 3, background: "#f3f4f6" }} />
+                        <div style={{ width: 24, height: 6, borderRadius: 3, background: "#e5e7eb" }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        {/* 목업 위 떠있는 완료 토스트 */}
+        <div style={{ position: "absolute", top: "clamp(88px, 9.5vw, 116px)", right: "clamp(44px, 6vw, 68px)", zIndex: 5, display: "flex", alignItems: "center", gap: 8, background: "#fff", borderRadius: 10, padding: "8px 12px", boxShadow: "0 12px 28px rgba(0,0,0,0.35)" }}>
+          <div style={{ width: 18, height: 18, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#16a34a", fontWeight: 700 }}>✓</div>
+          <div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#111827" }}>Slack 접근 회수 완료</div>
+            <div style={{ fontSize: 9, color: "#9ca3af" }}>0.4초 소요</div>
+          </div>
+        </div>
 
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #0d0d18 28%, transparent 70%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #0d0d18 40%, transparent 72%)" }} />
 
-        <div style={{ position: "relative", zIndex: 10, padding: "0 40px 32px" }}>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: "0 0 10px", lineHeight: 1.3, letterSpacing: "-0.02em" }}>
+        <div style={{ position: "relative", zIndex: 10, padding: "0 clamp(24px, 4vw, 40px) 32px" }}>
+          <h2 style={{ fontSize: "clamp(22px, 2.4vw, 28px)", fontWeight: 800, color: "#fff", margin: "0 0 10px", lineHeight: 1.3, letterSpacing: "-0.02em" }}>
             반복 업무 자동화의<br /><span style={{ color: "#818cf8" }}>새로운 표준</span>
           </h2>
-          <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 28px", lineHeight: 1.7 }}>
+          <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 18px", lineHeight: 1.7 }}>
             흩어진 업무를 AI가 하나로. 복잡한 오프보딩을 심플하게.
           </p>
+
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 18 }}>
+            {[
+              { label: "1초 오프보딩", value: "즉시 권한 회수" },
+              { label: "AI 인수인계", value: "맥락 그대로 전달" },
+              { label: "감사 로그", value: "모든 처리 기록" },
+            ].map(f => (
+              <div key={f.label} style={{ flex: "1 1 140px", minWidth: 120, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 12px" }}>
+                <div style={{ fontSize: 11, color: "#818cf8", fontWeight: 700, marginBottom: 3 }}>{f.label}</div>
+                <div style={{ fontSize: 11, color: "#9ca3af" }}>{f.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 고객 인용구 */}
+          <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 12.5, color: "#e5e7eb", lineHeight: 1.6 }}>
+              “퇴사자 계정 정리에 하루가 걸리던 일이 Continuum 덕분에 클릭 한 번으로 끝나요.”
+            </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#6366f1", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#fff" }}>JR</div>
+              <span style={{ fontSize: 11, color: "#9ca3af" }}>Jamie R. · IT 관리자, 스타트업 A사</span>
+            </div>
+          </div>
+
+          {/* 신뢰 지표 */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            {[["150+", "연동된 팀"], ["4.9/5", "평균 만족도"], ["12만+", "월간 처리 이벤트"]].map(([v, l]) => (
+              <div key={l}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "#fff", lineHeight: 1.2 }}>{v}</div>
+                <div style={{ fontSize: 10.5, color: "#6b7280" }}>{l}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
