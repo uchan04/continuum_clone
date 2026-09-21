@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import logoImg from "../assets/logo-new.png";
+import logoImg from "../../assets/logo-new.png";
 
 const STEPS = [
   { n: 1, path: "/step-1" },

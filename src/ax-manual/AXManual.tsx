@@ -1,5 +1,5 @@
 import { useState } from "react";
-import logoImg from "./assets/logo-new.png";
+import logoImg from "../assets/logo-new.png";
 import AXSurvey from "./AXSurvey";
 
 export default function AXManualPoC({ onComplete, onLogout }: { onComplete?: () => void; onLogout?: () => void }) {
