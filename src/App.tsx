@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import logoImg from "./assets/logo-new.png";
-import AXManualTab from "./ax-manual/AXManualTab";
 // v2
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -8,7 +7,7 @@ import AXManualTab from "./ax-manual/AXManualTab";
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App({ onLogout }: { onLogout?: () => void }) {
-  const [activeScreen, setActiveScreen] = useState<"offboarding" | "handover" | "axmanual">("offboarding");
+  const [activeScreen, setActiveScreen] = useState<"offboarding" | "handover">("offboarding");
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", width: "100%", background: "#f0f2f7", fontFamily: "Inter, system-ui, sans-serif", overflow: "hidden" }}>
@@ -36,13 +35,6 @@ export default function App({ onLogout }: { onLogout?: () => void }) {
             label="AI 업무 인수인계"
             badge="어시스턴트"
           />
-          <TabButton
-            active={activeScreen === "axmanual"}
-            onClick={() => setActiveScreen("axmanual")}
-            icon={<PocTabIcon active={activeScreen === "axmanual"} />}
-            label="AX 매뉴얼 생성"
-            badge="PoC"
-          />
         </div>
 
         {/* 우측 상태 */}
@@ -67,7 +59,6 @@ export default function App({ onLogout }: { onLogout?: () => void }) {
       <div style={{ flex: 1, overflow: "hidden" }}>
         {activeScreen === "offboarding" && <OffboardingDashboard />}
         {activeScreen === "handover" && <HandoverChat />}
-        {activeScreen === "axmanual" && <AXManualTab onLogout={onLogout} />}
       </div>
     </div>
   );
@@ -1759,7 +1750,4 @@ function ShieldTabIcon({ active }: { active: boolean }) {
 }
 function ChatTabIcon({ active }: { active: boolean }) {
   return <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 2h12a1 1 0 011 1v8a1 1 0 01-1 1H5l-3 2V3a1 1 0 011-1z" stroke={active ? "#818cf8" : "#555870"} strokeWidth="1.5" strokeLinejoin="round" /></svg>;
-}
-function PocTabIcon({ active }: { active: boolean }) {
-  return <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke={active ? "#818cf8" : "#555870"} strokeWidth="1.5" /><path d="M5 6h6M5 9h4" stroke={active ? "#818cf8" : "#555870"} strokeWidth="1.5" strokeLinecap="round" /></svg>;
 }
