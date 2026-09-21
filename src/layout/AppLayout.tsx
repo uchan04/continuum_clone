@@ -48,7 +48,7 @@ export default function AppLayout() {
         </nav>
 
         <div className="border-t border-slate-200 p-4 text-xs text-slate-400">
-          UI/UX 참고 클론 · 실제 데이터 아님
+          Continuum 컨셉 목업 · 실제 데이터 아님
         </div>
       </aside>
 
