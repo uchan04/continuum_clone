@@ -1,13 +1,24 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import './index.css'
-import App from './App.tsx'
+import React, { useState } from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App";
+import LoginScreen from "./LoginScreen";
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+function Shell() {
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  if (!loggedIn) {
+    return <LoginScreen onLogin={() => setLoggedIn(true)} />;
+  }
+
+  return <App onLogout={() => setLoggedIn(false)} />;
+}
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <Shell />
     </BrowserRouter>
-  </StrictMode>,
-)
+  </React.StrictMode>
+);
