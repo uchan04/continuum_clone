@@ -229,39 +229,23 @@ function AuditLogView({ logs, executed, executing }: {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 12, marginBottom: 14 }}>
         {([
-          { key: "all",      label: "전체 이벤트", value: allLogs.length,  color: "#111827" },
-          { key: "critical", label: "긴급",         value: counts.critical, color: "#dc2626" },
-          { key: "high",     label: "높음",         value: counts.high,     color: "#ea580c" },
-          { key: "medium",   label: "보통",         value: counts.medium,   color: "#d97706" },
+          { key: "all",      label: "전체 이벤트", value: allLogs.length,  sub: "실시간 반영",                                                            subColor: "#6b7280" },
+          { key: "critical", label: "긴급",         value: counts.critical, sub: `전체의 ${Math.round(counts.critical / allLogs.length * 100)}%`, subColor: "#dc2626" },
+          { key: "high",     label: "높음",         value: counts.high,     sub: `전체의 ${Math.round(counts.high / allLogs.length * 100)}%`,     subColor: "#ea580c" },
+          { key: "medium",   label: "보통",         value: counts.medium,   sub: `전체의 ${Math.round(counts.medium / allLogs.length * 100)}%`,   subColor: "#d97706" },
+          { key: "info",     label: "정보",         value: counts.info,     sub: `전체의 ${Math.round(counts.info / allLogs.length * 100)}%`,     subColor: "#6366f1" },
         ] as const).map(s => (
           <button key={s.key} onClick={() => setFilter(s.key)} style={{
             background: filter === s.key ? "#eef2ff" : "#fff",
             border: `1.5px solid ${filter === s.key ? "#6366f1" : "#f0f0f5"}`,
-            borderRadius: 12, padding: "13px 16px", cursor: "pointer", textAlign: "left",
+            borderRadius: 12, padding: "16px 18px", cursor: "pointer", textAlign: "left",
             boxShadow: "0 1px 4px rgba(0,0,0,0.06)", transition: "all 0.15s",
           }}>
-            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 5, textTransform: "uppercase" }}>{s.label}</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: filter === s.key ? "#6366f1" : s.color }}>{s.value}</div>
-          </button>
-        ))}
-      </div>
-
-      <div style={{ display: "flex", gap: 4, marginBottom: 12 }}>
-        {(["all", "critical", "high", "medium", "info"] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={{
-            padding: "6px 14px", borderRadius: 7, border: "1.5px solid",
-            borderColor: filter === f ? "#6366f1" : "#e5e7eb",
-            background: filter === f ? "#eef2ff" : "#fff",
-            color: filter === f ? "#6366f1" : "#6b7280",
-            fontSize: 12, cursor: "pointer", fontWeight: filter === f ? 600 : 400,
-            transition: "all 0.15s",
-          }}>
-            {f === "all" ? "전체" : severityCfg[f].label}
-            <span style={{ marginLeft: 5, fontSize: 11, color: filter === f ? "#6366f1" : "#9ca3af", fontWeight: 600 }}>
-              {f === "all" ? allLogs.length : counts[f]}
-            </span>
+            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.02em" }}>{s.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em", marginBottom: 6, lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: 12, color: s.subColor, fontWeight: 400 }}>{s.sub}</div>
           </button>
         ))}
       </div>
@@ -395,23 +379,25 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
   };
 
   return (
-    <div style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div>
       {/* 타이틀 */}
-      <h1 style={{ margin: "0 0 20px", fontSize: 24, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em" }}>시작하기</h1>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>대시보드</div>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em" }}>시작하기</h1>
+      </div>
 
       {/* KPI 카드 4개 */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 18 }}>
         {[
-          { icon: "💰", label: "월간 SaaS 비용",   value: `₩${(monthlySaasCost/10000).toFixed(0)}만`,  trend: "↑ 전월 대비 8.5%",   trendUp: true },
-          { icon: "👥", label: "전체 직원",         value: `${total}명`,   trend: `↑ 재직 ${active}명 활성`,       trendUp: true },
-          { icon: "🚪", label: "퇴사 처리 완료",    value: `${offboarded}명`, trend: "↓ 이번 달 2건 처리",         trendUp: false },
-          { icon: "⚠️", label: "보안 위험 직원",    value: `${highRisk}명`,   trend: "↑ 즉시 처리 필요",            trendUp: false },
+          { label: "월간 SaaS 비용",  value: `₩${(monthlySaasCost/10000).toFixed(0)}만`,  trend: "전월 대비 8.5%",   trendUp: true },
+          { label: "전체 직원",         value: `${total}명`,   trend: `재직 ${active}명 활성`,       trendUp: true },
+          { label: "퇴사 처리 완료",    value: `${offboarded}명`, trend: "이번 달 2건 처리",         trendUp: false },
+          { label: "보안 위험 직원",    value: `${highRisk}명`,   trend: "즉시 처리 필요",            trendUp: false },
         ].map(kpi => (
-          <div key={kpi.label} style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16, padding: "22px 22px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ fontSize: 26, marginBottom: 10, lineHeight: 1 }}>{kpi.icon}</div>
-            <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 6 }}>{kpi.label}</div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: "#111827", letterSpacing: "-0.03em", marginBottom: 6, lineHeight: 1 }}>{kpi.value}</div>
-            <div style={{ fontSize: 12, color: kpi.trendUp ? "#16a34a" : "#dc2626", fontWeight: 500 }}>{kpi.trend}</div>
+          <div key={kpi.label} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.02em" }}>{kpi.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em", marginBottom: 6, lineHeight: 1 }}>{kpi.value}</div>
+            <div style={{ fontSize: 12, color: kpi.trendUp ? "#16a34a" : "#dc2626", fontWeight: 400 }}>{kpi.trend}</div>
           </div>
         ))}
       </div>
@@ -419,7 +405,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
       {/* 중단: SaaS 테이블 + 히트맵 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
         {/* 사용 중인 주요 SaaS */}
-        <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>사용 중인 주요 SaaS</div>
             <button onClick={() => onGo("saas")} style={{ fontSize: 12, color: "#6366f1", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>전체 앱 보기 →</button>
@@ -442,7 +428,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
         </div>
 
         {/* 사용량 히트맵 */}
-        <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>사용량 히트맵</div>
             <button onClick={() => onGo("audit")} style={{ fontSize: 12, color: "#6366f1", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>자세히 보기 →</button>
@@ -476,7 +462,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
               {/* 시간 레이블 — 일부만 */}
               <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
                 {["0:00","8:00","16:00","22:00"].map(t => (
-                  <span key={t} style={{ fontSize: 9, color: "#9ca3af" }}>{t}</span>
+                  <span key={t} style={{ fontSize: 10, color: "#9ca3af" }}>{t}</span>
                 ))}
               </div>
               {/* 범례 */}
@@ -489,7 +475,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
             {/* 오른쪽 시간 레이블 */}
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", paddingBottom: 28 }}>
               {HOUR_LABELS.map(h => (
-                <span key={h} style={{ fontSize: 9, color: "#9ca3af", lineHeight: 1 }}>{h}</span>
+                <span key={h} style={{ fontSize: 10, color: "#9ca3af", lineHeight: 1 }}>{h}</span>
               ))}
             </div>
           </div>
@@ -499,7 +485,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
       {/* 하단: 감사 로그 + 위험 직원 + 빠른 이동 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 260px", gap: 14 }}>
         {/* 최근 감사 이벤트 */}
-        <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>최근 감사 이벤트</div>
             <button onClick={() => onGo("audit")} style={{ fontSize: 12, color: "#6366f1", background: "none", border: "none", cursor: "pointer", fontWeight: 500 }}>전체 보기 →</button>
@@ -508,7 +494,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
             const sev = sevMap[log.severity as keyof typeof sevMap] ?? sevMap.info;
             return (
               <div key={log.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "9px 0", borderBottom: i < recentLogs.length - 1 ? "1px solid #f3f4f6" : "none" }}>
-                <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 5, background: sev.bg, color: sev.color, fontWeight: 600, whiteSpace: "nowrap", marginTop: 2 }}>{sev.label}</span>
+                <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: sev.bg, color: sev.color, fontWeight: 600, whiteSpace: "nowrap", marginTop: 2 }}>{sev.label}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12, color: "#111827", fontWeight: 500, lineHeight: 1.4 }}>{log.detail}</div>
                   <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{log.ts} · {log.actor}</div>
@@ -518,21 +504,21 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
           })}
           {logs.length > 0 && (
             <div style={{ marginTop: 10, padding: "8px 12px", background: "#eef2ff", borderRadius: 8, fontSize: 12, color: "#6366f1", fontWeight: 500 }}>
-              + 실시간 이벤트 {logs.length}건 — <button onClick={() => onGo("audit")} style={{ background: "none", border: "none", color: "#6366f1", cursor: "pointer", fontWeight: 700, fontSize: 12, padding: 0 }}>감사 로그에서 확인</button>
+              + 실시간 이벤트 {logs.length}건 — <button onClick={() => onGo("audit")} style={{ background: "none", border: "none", color: "#6366f1", cursor: "pointer", fontWeight: 600, fontSize: 12, padding: 0 }}>감사 로그에서 확인</button>
             </div>
           )}
         </div>
 
         {/* 우측: 위험 직원 + 빠른 이동 */}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+          <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#111827" }}>보안 위험 직원</div>
-              <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 5, background: "#fee2e2", color: "#dc2626", fontWeight: 600 }}>{highRisk}명</span>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>보안 위험 직원</div>
+              <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: "#fee2e2", color: "#dc2626", fontWeight: 600 }}>{highRisk}명</span>
             </div>
             {employees.filter(e => e.risk === "high" && empStatuses[e.id] === "active").map(emp => (
               <div key={emp.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid #f9fafb" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#fee2e2", border: "1px solid #fecaca", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#dc2626", flexShrink: 0 }}>{emp.avatar}</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#fee2e2", border: "1px solid #fecaca", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#dc2626", flexShrink: 0 }}>{emp.avatar}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "#111827" }}>{emp.name}</div>
                   <div style={{ fontSize: 11, color: "#9ca3af" }}>{emp.role}</div>
@@ -542,8 +528,8 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
             ))}
           </div>
 
-          <div style={{ background: "#fff", border: "1px solid #e5e7eb", borderRadius: 16, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 12 }}>빠른 이동</div>
+          <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "18px 20px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", marginBottom: 12 }}>빠른 이동</div>
             {[
               { label: "직원 목록", sub: "전체 직원 조회", nav: "employees" },
               { label: "퇴사 처리 센터", sub: "오프보딩 실행", nav: "offboard-center" },
@@ -565,7 +551,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
 }
 
 function OffboardingDashboard() {
-  const [activeNav, setActiveNav] = useState("employees");
+  const [activeNav, setActiveNav] = useState("dashboard");
   const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
   const [executing, setExecuting] = useState(false);
   const [executed, setExecuted] = useState(false);
@@ -670,7 +656,7 @@ function OffboardingDashboard() {
           {activeNav === "employees" && <EmployeeListView empStatuses={empStatuses} setEmpStatuses={setEmpStatuses} onStartOffboard={startOffboard} />}
           {activeNav === "saas" && <SaasView />}
           {activeNav === "audit" && <AuditLogView logs={logs} executed={executed} executing={executing} />}
-          {activeNav === "settings" && <PlaceholderView label="설정" />}
+          {activeNav === "settings" && <SettingsView />}
           {activeNav === "dashboard" && <OverviewDashboard employees={EMPLOYEE_LIST} empStatuses={empStatuses} logs={logs} onGo={(nav) => setActiveNav(nav)} />}
           {activeNav === "offboard-center" && <>
           {!selectedEmp ? (
@@ -929,15 +915,22 @@ function EmployeeListView({ empStatuses, setEmpStatuses, onStartOffboard }: {
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 18 }}>
-        {[
-          { label: "전체 직원", value: employees.length, color: "#111827" },
-          { label: "재직 중", value: employees.filter(e => e.status === "active").length, color: "#16a34a" },
-          { label: "퇴사 처리 중", value: employees.filter(e => e.status === "offboarding").length, color: "#dc2626" },
-          { label: "퇴사 완료", value: employees.filter(e => e.status === "offboarded").length, color: "#9ca3af" },
-        ].map(s => (
-          <div key={s.label} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "14px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>{s.label}</div>
-            <div style={{ fontSize: 26, fontWeight: 700, color: s.color }}>{s.value}</div>
+        {(() => {
+          const activeCount = employees.filter(e => e.status === "active").length;
+          const offboardingCount = employees.filter(e => e.status === "offboarding").length;
+          const offboardedCount = employees.filter(e => e.status === "offboarded").length;
+          const deptCount = new Set(employees.map(e => e.dept)).size;
+          return [
+            { label: "전체 직원", value: `${employees.length}명`, sub: `부서 ${deptCount}곳`, color: "#111827", subColor: "#6b7280" },
+            { label: "재직 중", value: `${activeCount}명`, sub: `전체의 ${Math.round(activeCount / employees.length * 100)}%`, color: "#16a34a", subColor: "#16a34a" },
+            { label: "퇴사 처리 중", value: `${offboardingCount}명`, sub: offboardingCount > 0 ? "즉시 확인 필요" : "해당 없음", color: "#dc2626", subColor: offboardingCount > 0 ? "#dc2626" : "#9ca3af" },
+            { label: "퇴사 완료", value: `${offboardedCount}명`, sub: `전체의 ${Math.round(offboardedCount / employees.length * 100)}%`, color: "#9ca3af", subColor: "#9ca3af" },
+          ];
+        })().map(s => (
+          <div key={s.label} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.02em" }}>{s.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em", marginBottom: 6, lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: 12, color: s.subColor, fontWeight: 400 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -1016,15 +1009,20 @@ function SaasView() {
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 18 }}>
-        {[
-          { label: "연동 서비스", value: `${SAAS_LIST.length}개`, color: "#111827" },
-          { label: "총 사용자", value: `${totalUsers}명`, color: "#6366f1" },
-          { label: "월 총 비용", value: totalCost, color: "#111827" },
-          { label: "고위험 서비스", value: `${SAAS_LIST.filter(s => s.risk === "high").length}개`, color: "#dc2626" },
-        ].map(s => (
-          <div key={s.label} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "14px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 6, textTransform: "uppercase" }}>{s.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: s.color }}>{s.value}</div>
+        {(() => {
+          const highRiskCount = SAAS_LIST.filter(s => s.risk === "high").length;
+          const catCount = new Set(SAAS_LIST.map(s => s.category)).size;
+          return [
+            { label: "연동 서비스", value: `${SAAS_LIST.length}개`, sub: "모두 연동 완료", subColor: "#16a34a" },
+            { label: "총 사용자", value: `${totalUsers}명`, sub: `${catCount}개 카테고리`, subColor: "#6b7280" },
+            { label: "월 총 비용", value: totalCost, sub: "전월 대비 8.5%", subColor: "#16a34a" },
+            { label: "고위험 서비스", value: `${highRiskCount}개`, sub: highRiskCount > 0 ? "즉시 점검 필요" : "없음", subColor: highRiskCount > 0 ? "#dc2626" : "#9ca3af" },
+          ];
+        })().map(s => (
+          <div key={s.label} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.02em" }}>{s.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em", marginBottom: 6, lineHeight: 1 }}>{s.value}</div>
+            <div style={{ fontSize: 12, color: s.subColor, fontWeight: 400 }}>{s.sub}</div>
           </div>
         ))}
       </div>
@@ -1075,14 +1073,181 @@ function SaasView() {
 }
 
 
-function PlaceholderView({ label }: { label: string }) {
+// ─────────────────────────────────────────────────────────────────────────────
+// 설정 탭
+// ─────────────────────────────────────────────────────────────────────────────
+
+function SettingsCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "60%", gap: 12 }}>
-      <div style={{ width: 52, height: 52, borderRadius: 14, background: "#f3f4f6", border: "1px solid #e5e7eb", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+    <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: 14 }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: "#111827", marginBottom: description ? 3 : 14 }}>{title}</div>
+      {description && <div style={{ fontSize: 12, color: "#9ca3af", marginBottom: 16 }}>{description}</div>}
+      {children}
+    </div>
+  );
+}
+
+function SettingsField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ fontSize: 12, color: "#374151", fontWeight: 600, display: "block", marginBottom: 6 }}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+const inputStyle: React.CSSProperties = {
+  width: "100%", background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 9,
+  padding: "10px 13px", fontSize: 13, color: "#111827", outline: "none", boxSizing: "border-box",
+  fontFamily: "Inter, sans-serif",
+};
+
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button
+      onClick={() => onChange(!checked)}
+      style={{
+        width: 38, height: 22, borderRadius: 999, border: "none", cursor: "pointer", position: "relative",
+        background: checked ? "#6366f1" : "#e5e7eb", transition: "background 0.15s", flexShrink: 0,
+      }}
+    >
+      <span style={{
+        position: "absolute", top: 2, left: checked ? 18 : 2, width: 18, height: 18, borderRadius: "50%",
+        background: "#fff", transition: "left 0.15s", boxShadow: "0 1px 2px rgba(0,0,0,0.2)",
+      }} />
+    </button>
+  );
+}
+
+function SettingsRow({ label, sub, children }: { label: string; sub?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "11px 0", borderBottom: "1px solid #f9fafb" }}>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: "#111827" }}>{label}</div>
+        {sub && <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>{sub}</div>}
       </div>
-      <div style={{ fontSize: 15, fontWeight: 600, color: "#374151" }}>{label} 준비 중</div>
-      <div style={{ fontSize: 13, color: "#9ca3af" }}>이 섹션은 곧 제공될 예정입니다.</div>
+      {children}
+    </div>
+  );
+}
+
+const SETTINGS_ADMINS = [
+  { id: 1, name: "Jamie R.", email: "jamie@company.com", role: "IT 관리자" },
+  { id: 2, name: "Mia Jung", email: "mia@company.com", role: "HR 관리자" },
+  { id: 3, name: "Emily Choi", email: "emily@company.com", role: "뷰어" },
+];
+
+const RETENTION_OPTIONS = ["즉시 삭제", "24시간 보관 후 삭제", "7일 보관 후 삭제"];
+
+function SettingsView() {
+  const [companyName, setCompanyName] = useState("포엔 주식회사");
+  const [domain, setDomain] = useState("company.com");
+  const [timezone, setTimezone] = useState("Asia/Seoul (GMT+9)");
+
+  const [requireApproval, setRequireApproval] = useState(true);
+  const [autoTrigger, setAutoTrigger] = useState(false);
+
+  const [requireSourceLink, setRequireSourceLink] = useState(true);
+  const [retention, setRetention] = useState(RETENTION_OPTIONS[0]);
+
+  const [webhookCopied, setWebhookCopied] = useState(false);
+  const webhookUrl = "https://api.continuum.app/webhooks/hr-offboard/9f2a1c";
+
+  return (
+    <div>
+      <div style={{ marginBottom: 18 }}>
+        <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 4 }}>설정</div>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#111827", letterSpacing: "-0.02em" }}>워크스페이스 설정</h1>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div>
+          <SettingsCard title="조직 정보" description="퇴사 처리 알림과 리포트에 표시되는 회사 정보입니다.">
+            <SettingsField label="회사명">
+              <input style={inputStyle} value={companyName} onChange={e => setCompanyName(e.target.value)} />
+            </SettingsField>
+            <SettingsField label="도메인">
+              <input style={inputStyle} value={domain} onChange={e => setDomain(e.target.value)} />
+            </SettingsField>
+            <SettingsField label="시간대">
+              <select style={{ ...inputStyle, cursor: "pointer" }} value={timezone} onChange={e => setTimezone(e.target.value)}>
+                <option>Asia/Seoul (GMT+9)</option>
+                <option>UTC</option>
+              </select>
+            </SettingsField>
+          </SettingsCard>
+
+          <SettingsCard title="관리자 권한" description="워크스페이스에 접근할 수 있는 관리자를 관리합니다.">
+            {SETTINGS_ADMINS.map(a => (
+              <SettingsRow key={a.id} label={a.name} sub={a.email}>
+                <select style={{ fontSize: 12, padding: "5px 10px", borderRadius: 8, border: "1px solid #e5e7eb", color: "#374151", background: "#f9fafb", cursor: "pointer" }} defaultValue={a.role}>
+                  <option>IT 관리자</option>
+                  <option>HR 관리자</option>
+                  <option>뷰어</option>
+                </select>
+              </SettingsRow>
+            ))}
+            <button style={{ marginTop: 12, width: "100%", fontSize: 12, padding: "9px 0", borderRadius: 8, background: "#eef2ff", border: "1px solid #c7d2fe", color: "#6366f1", cursor: "pointer", fontWeight: 600 }}>
+              + 관리자 초대
+            </button>
+          </SettingsCard>
+
+          <SettingsCard title="구독 플랜" description="스탠다드 플랜 · 50인 기준 기본 연동 + 권한 차단">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#111827" }}>₩90,000<span style={{ fontSize: 12, fontWeight: 500, color: "#9ca3af" }}> /월</span></div>
+                <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>오프보딩 처리 건당 ₩15,000 추가 과금</div>
+              </div>
+              <button style={{ fontSize: 12, padding: "8px 16px", borderRadius: 8, background: "#f9fafb", border: "1px solid #e5e7eb", color: "#6b7280", cursor: "pointer", fontWeight: 600 }}>플랜 변경</button>
+            </div>
+          </SettingsCard>
+        </div>
+
+        <div>
+          <SettingsCard title="오프보딩 정책" description="원클릭 권한 회수가 실행되는 방식을 설정합니다.">
+            <SettingsRow label="실행 전 관리자 승인 필요" sub="퇴사 처리 시작 시 2차 승인자 확인 요청">
+              <Toggle checked={requireApproval} onChange={setRequireApproval} />
+            </SettingsRow>
+            <SettingsRow label="HR 이벤트 수신 시 자동 실행" sub="웹훅으로 퇴사 이벤트 수신 즉시 권한 회수 시작">
+              <Toggle checked={autoTrigger} onChange={setAutoTrigger} />
+            </SettingsRow>
+            <div style={{ marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: "#374151", fontWeight: 600, marginBottom: 8 }}>권한 회수 처리 순서</div>
+              {["Slack", "Google Workspace", "Jira", "사내 ERP"].map((s, i) => (
+                <div key={s} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#6b7280", padding: "4px 0" }}>
+                  <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#f3f4f6", color: "#9ca3af", fontSize: 10, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{i + 1}</span>
+                  {s}
+                </div>
+              ))}
+            </div>
+          </SettingsCard>
+
+          <SettingsCard title="AI 인수인계 설정" description="권한 인식(Permission-Aware) RAG 및 데이터 보존 정책입니다.">
+            <SettingsRow label="원본 출처 링크 태깅 필수" sub="AI 환각 방지를 위해 모든 항목에 출처 표기 강제">
+              <Toggle checked={requireSourceLink} onChange={setRequireSourceLink} />
+            </SettingsRow>
+            <SettingsField label="Zero-Retention 보존 기간">
+              <select style={{ ...inputStyle, cursor: "pointer" }} value={retention} onChange={e => setRetention(e.target.value)}>
+                {RETENTION_OPTIONS.map(o => <option key={o}>{o}</option>)}
+              </select>
+            </SettingsField>
+          </SettingsCard>
+
+          <SettingsCard title="Webhook" description="HR/ERP 시스템에서 퇴사 이벤트를 전달받는 엔드포인트입니다.">
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#f9fafb", border: "1px solid #e5e7eb", borderRadius: 8, padding: "9px 12px" }}>
+              <code style={{ flex: 1, fontSize: 11, color: "#374151", fontFamily: "JetBrains Mono, monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{webhookUrl}</code>
+              <button
+                onClick={() => { navigator.clipboard.writeText(webhookUrl).catch(() => {}); setWebhookCopied(true); setTimeout(() => setWebhookCopied(false), 1800); }}
+                style={{ fontSize: 11, padding: "4px 10px", borderRadius: 8, fontWeight: 600, cursor: "pointer", flexShrink: 0,
+                  background: webhookCopied ? "#dcfce7" : "#fff", border: webhookCopied ? "1px solid #86efac" : "1px solid #e5e7eb",
+                  color: webhookCopied ? "#16a34a" : "#6b7280" }}
+              >
+                {webhookCopied ? "✓ 복사됨" : "복사"}
+              </button>
+            </div>
+          </SettingsCard>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1707,7 +1872,7 @@ function AXManualTab({ onLogout }: { onLogout?: () => void }) {
           ))}
         </div>
 
-        <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 16, padding: "26px 28px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, padding: "26px 28px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
           <h2 style={{ margin: "0 0 20px", fontSize: 15, fontWeight: 700, color: "#111827" }}>시작하기</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div>
@@ -1831,7 +1996,7 @@ function AXManualTab({ onLogout }: { onLogout?: () => void }) {
         <h3 style={{ fontSize: 11, fontWeight: 600, color: "#9ca3af", margin: "0 0 10px", letterSpacing: "0.06em", textTransform: "uppercase" }}>생성된 프롬프트 세트</h3>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
           {PROMPTS.map((p, i) => (
-            <div key={i} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 11, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+            <div key={i} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid #f3f4f6" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 15 }}>{p.icon}</span>
@@ -1876,7 +2041,7 @@ function AXManualTab({ onLogout }: { onLogout?: () => void }) {
 
         {!submitted ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 13, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: "0 0 14px" }}>생성된 매뉴얼에 얼마나 만족하셨나요?</p>
               <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
                 {[1,2,3,4,5].map(n => (
@@ -1889,7 +2054,7 @@ function AXManualTab({ onLogout }: { onLogout?: () => void }) {
               {starRating > 0 && <p style={{ textAlign: "center", fontSize: 12, color: "#6b7280", margin: "8px 0 0" }}>{["","개선이 많이 필요해요","보통이에요","괜찮았어요","좋았어요!","매우 만족해요! 🚀"][starRating]}</p>}
             </div>
 
-            <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 13, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: "0 0 4px" }}>자동화 툴 형태로 계속 이용하시겠습니까?</p>
               <p style={{ fontSize: 12, color: "#9ca3af", margin: "0 0 12px" }}>매월 업데이트 AI 프롬프트 세트, 분석 리포트, 팀 협업 기능 포함</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
@@ -1901,7 +2066,7 @@ function AXManualTab({ onLogout }: { onLogout?: () => void }) {
               </div>
             </div>
 
-            <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 13, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+            <div style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "20px 22px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
               <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: "0 0 4px" }}>월 구독 서비스 적정 가격은?</p>
               <p style={{ fontSize: 12, color: "#9ca3af", margin: "0 0 12px" }}>팀 기준 (최대 10인)</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
