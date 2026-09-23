@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import logoImg from "./assets/logo-new.png";
+import { listEmployees, registerEmployee, offboardEmployee, type Employee as ApiEmployee } from "./api";
 // v2
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -544,7 +545,7 @@ function OverviewDashboard({ employees, empStatuses, logs, onGo }: {
 
 function OffboardingDashboard() {
   const [activeNav, setActiveNav] = useState("dashboard");
-  const [selectedEmpId, setSelectedEmpId] = useState<string | null>(null);
+  const [selectedEmpId] = useState<string | null>(null);
   const [executing, setExecuting] = useState(false);
   const [executed, setExecuted] = useState(false);
   const [logs, setLogs] = useState<LogLine[]>([]);
@@ -559,15 +560,6 @@ function OffboardingDashboard() {
   useEffect(() => { logEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [logs]);
 
   const selectedEmp = selectedEmpId ? EMPLOYEE_LIST.find(e => e.id === selectedEmpId) ?? null : null;
-
-  const startOffboard = (empId: string) => {
-    setSelectedEmpId(empId);
-    setActiveNav("offboard-center");
-    setExecuting(false);
-    setExecuted(false);
-    setLogs([]);
-    setIntegStatus({ slack: "active", google: "active", jira: "active", erp: "active" });
-  };
 
   const handleExecute = () => {
     if (executing || executed || !selectedEmpId) return;
@@ -645,7 +637,7 @@ function OffboardingDashboard() {
         </div>
 
         <div style={{ flex: 1, overflow: "auto", padding: "20px 24px" }}>
-          {activeNav === "employees" && <EmployeeListView empStatuses={empStatuses} setEmpStatuses={setEmpStatuses} onStartOffboard={startOffboard} />}
+          {activeNav === "employees" && <EmployeeListView />}
           {activeNav === "saas" && <SaasView />}
           {activeNav === "audit" && <AuditLogView logs={logs} executed={executed} executing={executing} />}
           {activeNav === "settings" && <SettingsView />}
@@ -875,13 +867,58 @@ function OffboardingDashboard() {
 
 // ── 직원 목록 탭 ─────────────────────────────────────────────────────────────
 
-function EmployeeListView({ empStatuses, setEmpStatuses, onStartOffboard }: {
-  empStatuses: Record<string, string>;
-  setEmpStatuses: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  onStartOffboard: (empId: string) => void;
-}) {
+function EmployeeListView() {
   const [search, setSearch] = useState("");
-  const employees = EMPLOYEE_LIST.map(e => ({ ...e, status: empStatuses[e.id] ?? e.status }));
+  const [rawEmployees, setRawEmployees] = useState<ApiEmployee[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const reload = () => {
+    setLoading(true);
+    setError("");
+    listEmployees({ size: 100 })
+      .then(page => setRawEmployees(page.content))
+      .catch(e => setError(e instanceof Error ? e.message : "직원 목록을 불러오지 못했습니다."))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { reload(); }, []);
+
+  const handleAdd = async () => {
+    const name = window.prompt("이름을 입력하세요");
+    if (!name) return;
+    const email = window.prompt("이메일을 입력하세요");
+    if (!email) return;
+    const department = window.prompt("부서 (선택, 취소해도 무방)") || undefined;
+    const position = window.prompt("직책 (선택, 취소해도 무방)") || undefined;
+    try {
+      await registerEmployee({ name, email, department, position });
+      reload();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "직원 등록에 실패했습니다.");
+    }
+  };
+
+  const handleOffboard = async (id: number, name: string) => {
+    if (!window.confirm(`${name}님을 퇴사 처리하시겠습니까?`)) return;
+    try {
+      await offboardEmployee(id);
+      reload();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "퇴사 처리에 실패했습니다.");
+    }
+  };
+
+  const employees = rawEmployees.map(e => ({
+    id: e.id,
+    name: e.name,
+    role: e.position || "—",
+    dept: e.department || "—",
+    status: e.status === "ACTIVE" ? "active" : "offboarded",
+    lastActive: e.offboardedAt ? e.offboardedAt.slice(0, 10) : e.createdAt.slice(0, 10),
+    avatar: e.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase(),
+    risk: "none" as "none" | "high" | "medium" | "low",
+  }));
   const filtered = employees.filter(e =>
     e.name.toLowerCase().includes(search.toLowerCase()) ||
     e.dept.includes(search) || e.role.includes(search)
@@ -891,6 +928,8 @@ function EmployeeListView({ empStatuses, setEmpStatuses, onStartOffboard }: {
     offboarding: { label: "퇴사 처리", color: "#a16207", bg: "#fef9c3", border: "#fde047" },
     offboarded:  { label: "퇴사 완료", color: "#6b7280", bg: "#f3f4f6", border: "#e5e7eb" },
   };
+  if (loading) return <div style={{ padding: 40, textAlign: "center", color: "#9ca3af", fontSize: 13 }}>불러오는 중...</div>;
+  if (error) return <div style={{ padding: 40, textAlign: "center", color: "#dc2626", fontSize: 13 }}>{error}</div>;
   return (
     <div>
       <div style={{ marginBottom: 18 }}>
@@ -902,7 +941,7 @@ function EmployeeListView({ empStatuses, setEmpStatuses, onStartOffboard }: {
               <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="#9ca3af" strokeWidth="1.5" /><path d="M10.5 10.5L14 14" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" /></svg>
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="이름, 부서, 직책 검색..." style={{ background: "transparent", border: "none", outline: "none", fontSize: 13, color: "#111827", width: 190, fontFamily: "Inter, system-ui, sans-serif" }} />
             </div>
-            <button style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 9, padding: "7px 16px", fontSize: 13, color: "#6366f1", cursor: "pointer", fontWeight: 600 }}>+ 직원 추가</button>
+            <button onClick={handleAdd} style={{ background: "#eef2ff", border: "1px solid #c7d2fe", borderRadius: 9, padding: "7px 16px", fontSize: 13, color: "#6366f1", cursor: "pointer", fontWeight: 600 }}>+ 직원 추가</button>
           </div>
         </div>
       </div>
@@ -914,9 +953,9 @@ function EmployeeListView({ empStatuses, setEmpStatuses, onStartOffboard }: {
           const deptCount = new Set(employees.map(e => e.dept)).size;
           return [
             { label: "전체 직원", value: `${employees.length}명`, sub: `부서 ${deptCount}곳`, color: "#111827", subColor: "#6b7280" },
-            { label: "재직 중", value: `${activeCount}명`, sub: `전체의 ${Math.round(activeCount / employees.length * 100)}%`, color: "#16a34a", subColor: "#16a34a" },
+            { label: "재직 중", value: `${activeCount}명`, sub: `전체의 ${employees.length ? Math.round(activeCount / employees.length * 100) : 0}%`, color: "#16a34a", subColor: "#16a34a" },
             { label: "퇴사 처리 중", value: `${offboardingCount}명`, sub: offboardingCount > 0 ? "즉시 확인 필요" : "해당 없음", color: "#dc2626", subColor: offboardingCount > 0 ? "#dc2626" : "#9ca3af" },
-            { label: "퇴사 완료", value: `${offboardedCount}명`, sub: `전체의 ${Math.round(offboardedCount / employees.length * 100)}%`, color: "#9ca3af", subColor: "#9ca3af" },
+            { label: "퇴사 완료", value: `${offboardedCount}명`, sub: `전체의 ${employees.length ? Math.round(offboardedCount / employees.length * 100) : 0}%`, color: "#9ca3af", subColor: "#9ca3af" },
           ];
         })().map(s => (
           <div key={s.label} style={{ background: "#fff", border: "1px solid #f0f0f5", borderRadius: 12, padding: "16px 18px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
@@ -960,7 +999,7 @@ function EmployeeListView({ empStatuses, setEmpStatuses, onStartOffboard }: {
               <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
                 <button
                   disabled={emp.status !== "active"}
-                  onClick={() => { if (emp.status === "active") onStartOffboard(emp.id); }}
+                  onClick={() => { if (emp.status === "active") handleOffboard(emp.id, emp.name); }}
                   style={{
                     fontSize: 12, padding: "4px 10px", borderRadius: 6, fontWeight: 600,
                     cursor: emp.status === "active" ? "pointer" : "not-allowed",

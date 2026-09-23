@@ -1,0 +1,121 @@
+spring:
+  application:
+    name: continuum
+  
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:continuum}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+    open-in-view: false
+  
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+  
+  mail:
+    host: ${SMTP_HOST:smtp.gmail.com}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  
+  security:
+    user:
+      name: admin
+      password: admin123
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    mail:
+      enabled: false
+  metrics:
+    export:
+      cloudwatch:
+        enabled: false
+
+# Application Configuration
+continuum:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:}
+      expiration-ms: 86400000  # 24 hours
+    encryption:
+      secret-key: ${ENCRYPTION_SECRET_KEY:}
+  
+  notifications:
+    hr-manager-email: ${HR_MANAGER_EMAIL:hr@company.com}
+  
+  offboarding:
+    timeout-seconds: 1
+    parallel-execution: true
+  
+  integrations:
+    slack:
+      scim-base-url: https://api.slack.com/scim/v2
+    google-workspace:
+      api-base-url: https://admin.googleapis.com
+      sign-out-endpoint: /admin/directory/v1/users/{email}/signOut
+      token-endpoint: https://oauth2.googleapis.com/token
+      admin-scope: https://www.googleapis.com/auth/admin.directory.user.security
+
+logging:
+  level:
+    root: INFO
+    com.continuum: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

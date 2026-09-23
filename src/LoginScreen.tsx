@@ -1,5 +1,6 @@
 import { useState } from "react";
 import logoImg from "./assets/logo-new.png";
+import { login } from "./api";
 
 const FONT_STACK =
   "'Pretendard Variable', -apple-system, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif";
@@ -43,11 +44,18 @@ export default function LoginScreen({ onLogin }: { onLogin: () => void }) {
   const handleGoogleLogin = () => { onLogin(); };
   const handleContact = () => {};
 
-  const handleEmailLogin = () => {
+  const handleEmailLogin = async () => {
     if (!email || !password) { setError("이메일과 비밀번호를 입력해주세요."); return; }
     setError("");
     setLoading(true);
-    setTimeout(() => { setLoading(false); onLogin(); }, 900);
+    try {
+      await login(email, password);
+      onLogin();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "로그인에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
